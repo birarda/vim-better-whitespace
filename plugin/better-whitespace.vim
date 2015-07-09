@@ -72,7 +72,7 @@ function! s:EnableWhitespace()
         let g:better_whitespace_enabled = 1
         call <SID>WhitespaceInit()
         " Match default whitespace
-        call s:InAllWindows('match ExtraWhitespace /\s\+$/')
+        call s:InAllWindows('match ExtraWhitespace /\S\zs\s\+$/')
         call <SID>SetupAutoCommands()
         echo "Whitespace Highlighting: Enabled"
     endif
@@ -110,7 +110,7 @@ function! s:CurrentLineWhitespaceOff( level )
         if a:level == 'hard'
             let g:current_line_whitespace_disabled_hard = 1
             let g:current_line_whitespace_disabled_soft = 0
-            call s:InAllWindows('syn clear ExtraWhitespace | match ExtraWhitespace /\s\+$/')
+            call s:InAllWindows('syn clear ExtraWhitespace | match ExtraWhitespace /\S\zs\s\+$/')
             echo "Current Line Hightlight Off (hard)"
         elseif a:level == 'soft'
             let g:current_line_whitespace_disabled_soft = 1
@@ -129,7 +129,7 @@ function! s:CurrentLineWhitespaceOn()
         let g:current_line_whitespace_disabled_hard = 0
         let g:current_line_whitespace_disabled_soft = 0
         call <SID>SetupAutoCommands()
-        call s:InAllWindows('syn clear ExtraWhitespace | match ExtraWhitespace /\s\+$/')
+        call s:InAllWindows('syn clear ExtraWhitespace | match ExtraWhitespace /\S\zs\s\+$/')
         echo "Current Line Hightlight On"
     endif
 endfunction
@@ -142,7 +142,7 @@ function! s:StripWhitespace( line1, line2 )
     let c = col(".")
 
     " Strip the whitespace
-    silent! execute ':' . a:line1 . ',' . a:line2 . 's/\s\+$//e'
+    silent! execute ':' . a:line1 . ',' . a:line2 . 's/\S\zs\s\+$//e'
 
     " Restore the saved search and cursor position
     let @/=_s
@@ -199,25 +199,25 @@ function! <SID>SetupAutoCommands()
             " Check if current line is disabled softly
             if g:current_line_whitespace_disabled_soft == 0
                 " Highlight all whitespace upon entering buffer
-                autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
+                autocmd BufWinEnter * match ExtraWhitespace /\S\zs\s\+$/
                 " Check if current line highglighting is disabled
                 if g:current_line_whitespace_disabled_hard == 1
                     " Never highlight whitespace on current line
-                    autocmd InsertEnter,CursorMoved,CursorMovedI * exe 'match ExtraWhitespace ' . '/\%<' . line(".") .  'l\s\+$\|\%>' . line(".") .  'l\s\+$/'
+                    autocmd InsertEnter,CursorMoved,CursorMovedI * exe 'match ExtraWhitespace ' . '/\%<' . line(".") .  'l\S\zs\s\+$\|\%>' . line(".") .  'l\S\zs\s\+$/'
                 else
                     " When in insert mode, do not highlight whitespace on the current line
-                    autocmd InsertEnter,CursorMovedI * exe 'match ExtraWhitespace ' . '/\%<' . line(".") .  'l\s\+$\|\%>' . line(".") .  'l\s\+$/'
+                    autocmd InsertEnter,CursorMovedI * exe 'match ExtraWhitespace ' . '/\%<' . line(".") .  'l\S\zs\s\+$\|\%>' . line(".") .  'l\S\zs\s\+$/'
                 endif
                 " Highlight all whitespace when exiting insert mode
-                autocmd InsertLeave,BufReadPost * match ExtraWhitespace /\s\+$/
+                autocmd InsertLeave,BufReadPost * match ExtraWhitespace /\S\zs\s\+$/
                 " Clear whitespace highlighting when leaving buffer
                 autocmd BufWinLeave * match ExtraWhitespace ''
             else
                 " Highlight extraneous whitespace at the end of lines, but not the
                 " current line.
-                call s:InAllWindows('syn clear ExtraWhitespace | syn match ExtraWhitespace excludenl /\s\+$/')
-                autocmd InsertEnter * syn clear ExtraWhitespace | syn match ExtraWhitespace excludenl /\s\+\%#\@!$/ containedin=ALL
-                autocmd InsertLeave,BufReadPost * syn clear ExtraWhitespace | syn match ExtraWhitespace excludenl /\s\+$/ containedin=ALL
+                call s:InAllWindows('syn clear ExtraWhitespace | syn match ExtraWhitespace excludenl /\S\zs\s\+$/')
+                autocmd InsertEnter * syn clear ExtraWhitespace | syn match ExtraWhitespace excludenl /\S\zs\s\+\%#\@!$/ containedin=ALL
+                autocmd InsertLeave,BufReadPost * syn clear ExtraWhitespace | syn match ExtraWhitespace excludenl /\S\zs\s\+$/ containedin=ALL
             endif
         endif
 
